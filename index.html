@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AccountIQ — Plataforma Contable Inteligente</title>
+  <link rel="stylesheet" href="css/main.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M10 2L18 7V13L10 18L2 13V7L10 2Z" stroke="white" stroke-width="1.5" fill="none"/>
+          <path d="M10 6V14M6 8.5L14 11.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div>
+        <div class="logo-name">AccountIQ</div>
+        <div class="logo-tag">Pro · v2.4</div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-group-label">Principal</div>
+      <a class="nav-item active" onclick="showView('dashboard',this)" href="#">
+        <span class="nav-icon">⊞</span><span>Dashboard</span>
+      </a>
+      <a class="nav-item" onclick="showView('transacciones',this)" href="#">
+        <span class="nav-icon">⇄</span><span>Transacciones</span>
+      </a>
+      <a class="nav-item" onclick="showView('presupuesto',this)" href="#">
+        <span class="nav-icon">◎</span><span>Presupuesto</span>
+      </a>
+      <a class="nav-item" onclick="showView('reportes',this)" href="#">
+        <span class="nav-icon">☰</span><span>Reportes</span>
+      </a>
+
+      <div class="nav-group-label">Empresarial</div>
+      <a class="nav-item" onclick="showView('facturacion',this)" href="#">
+        <span class="nav-icon">◼</span><span>Facturación</span><span class="badge">3</span>
+      </a>
+      <a class="nav-item" onclick="showView('crm',this)" href="#">
+        <span class="nav-icon">⊙</span><span>Clientes CRM</span>
+      </a>
+      <a class="nav-item" onclick="showView('inventario',this)" href="#">
+        <span class="nav-icon">▤</span><span>Inventario</span>
+      </a>
+
+      <div class="nav-group-label">Inteligencia</div>
+      <a class="nav-item" onclick="showView('predicciones',this)" href="#">
+        <span class="nav-icon">◆</span><span>Predicciones IA</span>
+      </a>
+      <a class="nav-item" onclick="showView('alertas',this)" href="#">
+        <span class="nav-icon">⚡</span><span>Alertas</span><span class="badge danger">5</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="avatar">JL</div>
+        <div class="user-info">
+          <div class="user-name">Juan López</div>
+          <div class="user-role">Administrador</div>
+        </div>
+        <span class="gear-icon">⚙</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+        <h1 class="page-title" id="page-title">Dashboard</h1>
+      </div>
+      <div class="topbar-right">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="Buscar transacción, cliente..."/>
+        </div>
+        <button class="icon-btn notif" onclick="showView('alertas', null)">
+          🔔<span class="notif-dot"></span>
+        </button>
+        <button class="btn-primary" onclick="openModal('transaction')">+ Nueva Transacción</button>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <main class="content" id="content">
+
+      <!-- ═══════════════ DASHBOARD ═══════════════ -->
+      <div id="view-dashboard" class="view active">
+        <div class="period-tabs">
+          <button class="ptab active">Este mes</button>
+          <button class="ptab">Último trimestre</button>
+          <button class="ptab">Anual</button>
+        </div>
+
+        <!-- KPIs -->
+        <div class="kpi-grid">
+          <div class="kpi-card kpi-blue">
+            <div class="kpi-top">
+              <span class="kpi-label">Saldo Total</span>
+              <span class="kpi-icon">💰</span>
+            </div>
+            <div class="kpi-value">$48,230</div>
+            <div class="kpi-footer">
+              <span class="kpi-change up">↑ 12.4%</span>
+              <span class="kpi-sub">vs mes anterior</span>
+            </div>
+            <div class="kpi-sparkline"><canvas id="spark1"></canvas></div>
+          </div>
+          <div class="kpi-card kpi-green">
+            <div class="kpi-top">
+              <span class="kpi-label">Ingresos Marzo</span>
+              <span class="kpi-icon">📈</span>
+            </div>
+            <div class="kpi-value">$12,850</div>
+            <div class="kpi-footer">
+              <span class="kpi-change up">↑ 8.2%</span>
+              <span class="kpi-sub">vs febrero</span>
+            </div>
+            <div class="kpi-sparkline"><canvas id="spark2"></canvas></div>
+          </div>
+          <div class="kpi-card kpi-red">
+            <div class="kpi-top">
+              <span class="kpi-label">Gastos Marzo</span>
+              <span class="kpi-icon">📉</span>
+            </div>
+            <div class="kpi-value">$7,340</div>
+            <div class="kpi-footer">
+              <span class="kpi-change down">↑ 3.1%</span>
+              <span class="kpi-sub">vs febrero</span>
+            </div>
+            <div class="kpi-sparkline"><canvas id="spark3"></canvas></div>
+          </div>
+          <div class="kpi-card kpi-purple">
+            <div class="kpi-top">
+              <span class="kpi-label">Ahorro Neto</span>
+              <span class="kpi-icon">💎</span>
+            </div>
+            <div class="kpi-value">$5,510</div>
+            <div class="kpi-footer">
+              <span class="kpi-change up">↑ 18.7%</span>
+              <span class="kpi-sub">vs febrero</span>
+            </div>
+            <div class="kpi-sparkline"><canvas id="spark4"></canvas></div>
+          </div>
+        </div>
+
+        <!-- CHARTS ROW -->
+        <div class="charts-row">
+          <div class="card card-lg">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Flujo de Caja</h3>
+                <p class="card-sub">Ingresos vs egresos — últimos 6 meses</p>
+              </div>
+              <div class="chip-group">
+                <button class="chip active">6M</button>
+                <button class="chip">12M</button>
+                <button class="chip">2A</button>
+              </div>
+            </div>
+            <div class="chart-wrap" style="height:220px"><canvas id="cashflowChart"></canvas></div>
+            <div class="chart-legend">
+              <span class="legend-dot" style="background:#5b8def"></span>Ingresos
+              <span class="legend-dot" style="background:#e8634f;margin-left:12px"></span>Gastos
+              <span class="legend-dot" style="background:#3ec98a;margin-left:12px"></span>Ahorro neto
+            </div>
+          </div>
+
+          <div class="card card-sm">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Gastos por Categoría</h3>
+                <p class="card-sub">Marzo 2025</p>
+              </div>
+            </div>
+            <div class="chart-wrap" style="height:160px;display:flex;justify-content:center">
+              <canvas id="donutChart" style="max-width:160px"></canvas>
+            </div>
+            <div class="donut-legend">
+              <div class="dl-item"><span class="dl-dot" style="background:#5b8def"></span><span class="dl-name">Operación</span><strong>32%</strong></div>
+              <div class="dl-item"><span class="dl-dot" style="background:#3ec98a"></span><span class="dl-name">Nómina</span><strong>28%</strong></div>
+              <div class="dl-item"><span class="dl-dot" style="background:#f5a623"></span><span class="dl-name">Marketing</span><strong>18%</strong></div>
+              <div class="dl-item"><span class="dl-dot" style="background:#a78bfa"></span><span class="dl-name">Servicios</span><strong>12%</strong></div>
+              <div class="dl-item"><span class="dl-dot" style="background:#e8634f"></span><span class="dl-name">Otros</span><strong>10%</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BOTTOM ROW -->
+        <div class="bottom-row">
+          <!-- Transactions -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Últimas Transacciones</h3>
+              <button class="btn-link" onclick="showView('transacciones',null)">Ver todas →</button>
+            </div>
+            <div class="tx-list" id="tx-list-dash">
+              <!-- filled by JS -->
+            </div>
+          </div>
+
+          <!-- Budget -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Presupuesto Mensual</h3>
+                <p class="card-sub">Cada peso tiene un propósito</p>
+              </div>
+            </div>
+            <div class="budget-list" id="budget-list">
+              <!-- filled by JS -->
+            </div>
+          </div>
+
+          <!-- AI Alerts -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Alertas IA</h3>
+                <p class="card-sub">Recomendaciones inteligentes</p>
+              </div>
+              <span class="badge danger">5 nuevas</span>
+            </div>
+            <div class="alerts-list" id="alerts-dash">
+              <!-- filled by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════ TRANSACCIONES ═══════════════ -->
+      <div id="view-transacciones" class="view">
+        <div class="view-toolbar">
+          <div class="filter-group">
+            <select class="filter-select"><option>Todos los tipos</option><option>Ingresos</option><option>Gastos</option></select>
+            <select class="filter-select"><option>Todas las categorías</option><option>Operación</option><option>Nómina</option><option>Marketing</option><option>Ventas</option></select>
+            <input type="month" class="filter-select" value="2025-03"/>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn-outline" onclick="exportCSV()">⬇ Exportar CSV</button>
+            <button class="btn-primary" onclick="openModal('transaction')">+ Nueva</button>
+          </div>
+        </div>
+        <div class="card">
+          <table class="data-table" id="tx-full-table">
+            <thead>
+              <tr>
+                <th>Fecha</th><th>Descripción</th><th>Categoría</th><th>Cuenta</th><th>Tipo</th><th>Monto</th><th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tx-full-body">
+              <!-- filled by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══════════════ PRESUPUESTO ═══════════════ -->
+      <div id="view-presupuesto" class="view">
+        <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+          <div class="kpi-card kpi-green">
+            <div class="kpi-top"><span class="kpi-label">Presupuesto Total</span><span class="kpi-icon">🎯</span></div>
+            <div class="kpi-value">$22,000</div>
+            <div class="kpi-footer"><span class="kpi-sub">Asignado este mes</span></div>
+          </div>
+          <div class="kpi-card kpi-blue">
+            <div class="kpi-top"><span class="kpi-label">Utilizado</span><span class="kpi-icon">📊</span></div>
+            <div class="kpi-value">$14,490</div>
+            <div class="kpi-footer"><span class="kpi-change neutral">65.9% del total</span></div>
+          </div>
+          <div class="kpi-card kpi-purple">
+            <div class="kpi-top"><span class="kpi-label">Disponible</span><span class="kpi-icon">✅</span></div>
+            <div class="kpi-value">$7,510</div>
+            <div class="kpi-footer"><span class="kpi-change up">34.1% restante</span></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <div class="card-header">
+            <h3 class="card-title">Asignación por Categoría</h3>
+            <button class="btn-primary" onclick="openModal('budget')">+ Nueva Categoría</button>
+          </div>
+          <div class="budget-detail" id="budget-detail"><!-- filled by JS --></div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <div class="card-header"><h3 class="card-title">Comparación Mensual</h3></div>
+          <div class="chart-wrap" style="height:240px"><canvas id="budgetCompareChart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- ═══════════════ REPORTES ═══════════════ -->
+      <div id="view-reportes" class="view">
+        <div class="report-tabs">
+          <button class="rtab active" onclick="switchReport('resultados',this)">Estado de Resultados</button>
+          <button class="rtab" onclick="switchReport('balance',this)">Balance General</button>
+          <button class="rtab" onclick="switchReport('flujo',this)">Flujo de Caja</button>
+        </div>
+        <div id="report-resultados" class="report-view active">
+          <div class="report-header">
+            <div>
+              <h2 class="report-title">Estado de Resultados</h2>
+              <p class="report-period">Enero — Marzo 2025</p>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn-outline" onclick="alert('Exportando PDF...')">⬇ PDF</button>
+              <button class="btn-outline" onclick="alert('Exportando Excel...')">⬇ Excel</button>
+            </div>
+          </div>
+          <div class="card">
+            <table class="report-table">
+              <thead><tr><th>Concepto</th><th>Ene 2025</th><th>Feb 2025</th><th>Mar 2025</th><th>Total</th></tr></thead>
+              <tbody>
+                <tr class="section-header"><td colspan="5">INGRESOS OPERACIONALES</td></tr>
+                <tr><td class="indent">Ventas de productos</td><td>$5,200</td><td>$6,100</td><td>$7,400</td><td>$18,700</td></tr>
+                <tr><td class="indent">Servicios prestados</td><td>$4,900</td><td>$5,780</td><td>$5,450</td><td>$16,130</td></tr>
+                <tr class="subtotal"><td>Total Ingresos</td><td>$10,100</td><td>$11,880</td><td>$12,850</td><td>$34,830</td></tr>
+                <tr class="section-header"><td colspan="5">GASTOS OPERACIONALES</td></tr>
+                <tr><td class="indent">Nómina y salarios</td><td>$3,200</td><td>$3,400</td><td>$3,600</td><td>$10,200</td></tr>
+                <tr><td class="indent">Arriendo y servicios</td><td>$1,800</td><td>$1,800</td><td>$1,800</td><td>$5,400</td></tr>
+                <tr><td class="indent">Marketing</td><td>$600</td><td>$720</td><td>$850</td><td>$2,170</td></tr>
+                <tr><td class="indent">Tecnología</td><td>$400</td><td>$420</td><td>$420</td><td>$1,240</td></tr>
+                <tr><td class="indent">Otros gastos</td><td>$900</td><td>$778</td><td>$670</td><td>$2,348</td></tr>
+                <tr class="subtotal"><td>Total Gastos</td><td>$6,900</td><td>$7,118</td><td>$7,340</td><td>$21,358</td></tr>
+                <tr class="total-row"><td>UTILIDAD NETA</td><td class="green">$3,200</td><td class="green">$4,762</td><td class="green">$5,510</td><td class="green">$13,472</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div id="report-balance" class="report-view" style="display:none">
+          <div class="report-header"><div><h2 class="report-title">Balance General</h2><p class="report-period">Al 20 de Marzo 2025</p></div><div style="display:flex;gap:8px"><button class="btn-outline" onclick="alert('Exportando PDF...')">⬇ PDF</button><button class="btn-outline" onclick="alert('Exportando Excel...')">⬇ Excel</button></div></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div class="card"><h3 class="card-title" style="margin-bottom:12px">ACTIVOS</h3><table class="report-table"><tbody><tr class="section-header"><td colspan="2">Activos Corrientes</td></tr><tr><td class="indent">Caja y Bancos</td><td>$48,230</td></tr><tr><td class="indent">Cuentas por Cobrar</td><td>$9,800</td></tr><tr><td class="indent">Inventario</td><td>$12,400</td></tr><tr class="subtotal"><td>Total Activos Corrientes</td><td>$70,430</td></tr><tr class="section-header"><td colspan="2">Activos No Corrientes</td></tr><tr><td class="indent">Equipos y maquinaria</td><td>$18,000</td></tr><tr class="subtotal"><td>Total Activos No Corr.</td><td>$18,000</td></tr><tr class="total-row"><td>TOTAL ACTIVOS</td><td class="green">$88,430</td></tr></tbody></table></div>
+            <div class="card"><h3 class="card-title" style="margin-bottom:12px">PASIVOS & PATRIMONIO</h3><table class="report-table"><tbody><tr class="section-header"><td colspan="2">Pasivos Corrientes</td></tr><tr><td class="indent">Cuentas por Pagar</td><td>$4,200</td></tr><tr><td class="indent">Nómina por Pagar</td><td>$3,600</td></tr><tr class="subtotal"><td>Total Pasivos Corrientes</td><td>$7,800</td></tr><tr class="section-header"><td colspan="2">Patrimonio</td></tr><tr><td class="indent">Capital Social</td><td>$55,000</td></tr><tr><td class="indent">Utilidades Acumuladas</td><td>$25,630</td></tr><tr class="subtotal"><td>Total Patrimonio</td><td>$80,630</td></tr><tr class="total-row"><td>TOTAL PASIVOS + PAT.</td><td class="green">$88,430</td></tr></tbody></table></div>
+          </div>
+        </div>
+        <div id="report-flujo" class="report-view" style="display:none">
+          <div class="report-header"><div><h2 class="report-title">Flujo de Caja</h2><p class="report-period">Enero — Marzo 2025</p></div><div style="display:flex;gap:8px"><button class="btn-outline" onclick="alert('Exportando PDF...')">⬇ PDF</button><button class="btn-outline" onclick="alert('Exportando Excel...')">⬇ Excel</button></div></div>
+          <div class="card"><div class="chart-wrap" style="height:260px"><canvas id="flujoCajaChart"></canvas></div></div>
+        </div>
+      </div>
+
+      <!-- ═══════════════ FACTURACIÓN ═══════════════ -->
+      <div id="view-facturacion" class="view">
+        <div class="kpi-grid">
+          <div class="kpi-card kpi-blue"><div class="kpi-top"><span class="kpi-label">Facturas Emitidas</span><span class="kpi-icon">📄</span></div><div class="kpi-value">47</div><div class="kpi-footer"><span class="kpi-sub">Este mes</span></div></div>
+          <div class="kpi-card kpi-green"><div class="kpi-top"><span class="kpi-label">Total Cobrado</span><span class="kpi-icon">✅</span></div><div class="kpi-value">$38,400</div><div class="kpi-footer"><span class="kpi-change up">82% tasa de cobro</span></div></div>
+          <div class="kpi-card kpi-amber"><div class="kpi-top"><span class="kpi-label">Por Cobrar</span><span class="kpi-icon">⏳</span></div><div class="kpi-value">$8,600</div><div class="kpi-footer"><span class="kpi-sub">3 facturas pendientes</span></div></div>
+          <div class="kpi-card kpi-red"><div class="kpi-top"><span class="kpi-label">Vencidas</span><span class="kpi-icon">🚨</span></div><div class="kpi-value">$1,200</div><div class="kpi-footer"><span class="kpi-change down">1 factura — 45 días</span></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Facturas</h3>
+            <button class="btn-primary" onclick="openModal('invoice')">+ Nueva Factura</button>
+          </div>
+          <table class="data-table">
+            <thead><tr><th>#</th><th>Cliente</th><th>Fecha</th><th>Vencimiento</th><th>Concepto</th><th>Monto</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody id="invoice-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══════════════ CRM ═══════════════ -->
+      <div id="view-crm" class="view">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Clientes</h3>
+            <button class="btn-primary" onclick="openModal('client')">+ Nuevo Cliente</button>
+          </div>
+          <table class="data-table">
+            <thead><tr><th>Cliente</th><th>Email</th><th>Teléfono</th><th>Ciudad</th><th>Total Facturado</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody id="clients-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══════════════ INVENTARIO ═══════════════ -->
+      <div id="view-inventario" class="view">
+        <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+          <div class="kpi-card kpi-blue"><div class="kpi-top"><span class="kpi-label">Productos Activos</span><span class="kpi-icon">📦</span></div><div class="kpi-value">124</div></div>
+          <div class="kpi-card kpi-amber"><div class="kpi-top"><span class="kpi-label">Stock Bajo</span><span class="kpi-icon">⚠</span></div><div class="kpi-value">8</div><div class="kpi-footer"><span class="kpi-change down">Requieren reposición</span></div></div>
+          <div class="kpi-card kpi-green"><div class="kpi-top"><span class="kpi-label">Valor Inventario</span><span class="kpi-icon">💰</span></div><div class="kpi-value">$12,400</div></div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <div class="card-header"><h3 class="card-title">Inventario</h3><button class="btn-primary" onclick="openModal('product')">+ Nuevo Producto</button></div>
+          <table class="data-table">
+            <thead><tr><th>Producto</th><th>SKU</th><th>Categoría</th><th>Stock</th><th>Precio</th><th>Valor Total</th><th>Estado</th></tr></thead>
+            <tbody id="inventory-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══════════════ PREDICCIONES IA ═══════════════ -->
+      <div id="view-predicciones" class="view">
+        <div class="kpi-grid">
+          <div class="kpi-card kpi-green"><div class="kpi-top"><span class="kpi-label">Ingresos Proyect. Abr</span><span class="kpi-icon">🔮</span></div><div class="kpi-value">$14,200</div><div class="kpi-footer"><span class="kpi-change up">↑ 10.5% vs mar</span></div></div>
+          <div class="kpi-card kpi-blue"><div class="kpi-top"><span class="kpi-label">Score Financiero</span><span class="kpi-icon">⭐</span></div><div class="kpi-value">84/100</div><div class="kpi-footer"><span class="kpi-change up">↑ 6 pts vs Q1</span></div></div>
+          <div class="kpi-card kpi-amber"><div class="kpi-top"><span class="kpi-label">Riesgo Flujo Caja</span><span class="kpi-icon">⚡</span></div><div class="kpi-value">Medio</div><div class="kpi-footer"><span class="kpi-sub">Semana del 24 Mar</span></div></div>
+          <div class="kpi-card kpi-purple"><div class="kpi-top"><span class="kpi-label">Ahorro Potencial</span><span class="kpi-icon">💡</span></div><div class="kpi-value">$340/mes</div><div class="kpi-footer"><span class="kpi-sub">3 optimizaciones detectadas</span></div></div>
+        </div>
+        <div class="charts-row">
+          <div class="card card-lg">
+            <div class="card-header"><div><h3 class="card-title">Predicción Q2 2025</h3><p class="card-sub">Modelo IA — basado en 18 meses de historial</p></div></div>
+            <div class="chart-wrap" style="height:240px"><canvas id="predChart"></canvas></div>
+            <div class="chart-legend" style="margin-top:8px">
+              <span class="legend-dot" style="background:#5b8def"></span>Base
+              <span class="legend-dot" style="background:#3ec98a;margin-left:12px"></span>Optimista
+              <span class="legend-dot" style="background:#f5a623;margin-left:12px"></span>Conservador
+            </div>
+          </div>
+          <div class="card card-sm">
+            <div class="card-header"><h3 class="card-title">Recomendaciones IA</h3></div>
+            <div class="ai-recommendations" id="ai-recs"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════ ALERTAS ═══════════════ -->
+      <div id="view-alertas" class="view">
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">Centro de Alertas</h3><span class="badge danger">5 sin leer</span></div>
+          <div class="alerts-full" id="alerts-full"></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal()">
+  <div class="modal" id="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3 class="modal-title" id="modal-title">Nueva Transacción</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="js/data.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
