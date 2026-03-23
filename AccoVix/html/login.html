@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+		<title> ACCOVIX | LOGIN </title>
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap"/>
+		<link rel="stylesheet" href="../css/login.css"/>
+	</head>
+	<body>
+		<div class="login-wrap">
+			<div class="logo-area">
+				<div class="logo-icon">
+					<svg viewBox="0 0 30 30" fill="none"> <path d="M15 3L26 9.5V20.5L15 27L4 20.5V9.5L15 3Z" stroke="white" stroke-width="1.6" fill="none"/> <path d="M15 8V22M9 12L21 18" stroke="white" stroke-width="1.6" stroke-linecap="round"/> </svg>
+				</div>
+				<div class="logo-name"> AccoVix </div>
+				<div class="logo-sub"> Tus finanzas personales, bajo control </div>
+			</div>
+			<div class="card">
+				<div class="auth-tabs">
+					<button class="atab active" onclick="switchTab('login',this)"> Iniciar sesión </button>
+					<button class="atab" onclick="switchTab('register',this)"> Crear cuenta </button>
+				</div>
+				<div id="error-msg" class="error-msg"> </div>
+				<!-- LOGIN -->
+				<div id="panel-login">
+					<div class="form-group">
+						<label class="form-label"> Email o usuario </label>
+						<input class="form-input" id="login-user" type="text" placeholder="tucorreo@email.com" autocomplete="username"/>
+					</div>
+					<div class="form-group">
+						<label class="form-label"> Contraseña </label>
+						<input class="form-input" id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password"/>
+					</div>
+					<div class="forgot" onclick="showForgot()"> ¿Olvidaste tu contraseña? </div>
+					<button class="btn-primary" onclick="doLogin()"> Entrar → </button>
+					<div class="divider"> o </div>
+					<button class="demo-btn" onclick="loadDemo()"> Ver demo con datos de ejemplo </button>
+				</div>
+				<!-- REGISTER -->
+				<div id="panel-register" style="display:none">
+					<div class="form-group">
+						<label class="form-label"> ¿Cómo te llamas? </label>
+						<input class="form-input" id="reg-name" type="text" placeholder="Tu nombre"/>
+					</div>
+					<div class="form-group">
+						<label class="form-label"> Email </label>
+						<input class="form-input" id="reg-email" type="email" placeholder="tucorreo@email.com"/>
+					</div>
+					<div class="form-group">
+						<label class="form-label"> Contraseña </label>
+						<input class="form-input" id="reg-pass" type="password" placeholder="Mínimo 8 caracteres"/>
+					</div>
+					<button class="btn-primary" onclick="doRegister()"> Empezar gratis → </button>
+				</div>
+			</div>
+			<div class="footer-note"> AccoVix · Datos guardados solo en tu dispositivo </div>
+		</div>
+		<script src="../js/login.js"> </script>
+	</body>
+</html>

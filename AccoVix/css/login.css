@@ -1,0 +1,246 @@
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+	padding: 0
+}
+
+:root {
+    --bg: #0b0f1a;
+	--bg2: #111827;
+	--bg3: #1a2235;
+	--bg4: #222d42;
+
+	--bd: #1e2d45;
+	--bd2: #2a3d58;
+	--bd3: #3a5070;
+
+	--t1: #e6edf8;
+	--t2: #8496b0;
+	--t3: #4d6080;
+
+	--blue: #5b8def;
+	--blue-d: #3a6fd8;
+	--blue-bg: #0f1f3d;
+
+	--green: #3ec98a;
+	--red: #e8634f;
+	--purple: #a78bfa;
+
+	--r: 8px;
+	--r2: 12px;
+	--r3: 16px
+}
+
+html, body {
+    height: 100%;
+	background: var(--bg);
+	color: var(--t1);
+	font-family: 'DM Sans', sans-serif;
+	-webkit-font-smoothing: antialiased
+}
+
+body {
+    display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 100vh;
+	padding: 20px;
+	flex-direction: column
+}
+
+body::before {
+    content: '';
+	position: fixed;
+	inset: 0;
+	background: radial-gradient(ellipse at 20% 50%, rgba(91, 141, 239, .06) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(167, 139, 250, .05) 0%, transparent 60%);
+	pointer-events: none
+}
+
+.login-wrap {
+    width: 100%;
+    max-width: 420px;
+    position: relative
+}
+
+.logo-area {text-align: center; margin-bottom: 28px}
+
+.logo-icon {
+    width: 60px;
+	height: 60px;
+	background: linear-gradient(135deg, var(--blue), var(--purple));
+	border-radius: 18px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	margin-bottom: 14px;
+	box-shadow: 0 8px 32px rgba(91, 141, 239, .25)
+}
+
+.logo-icon svg {width: 30px; height: 30px}
+
+.logo-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -.5px
+}
+
+.logo-sub {
+    font-size: 13px;
+	color: var(--t3);
+	margin-top: 5px
+}
+
+.card {
+	background: var(--bg2);
+	border: 1px solid var(--bd);
+	border-radius: var(--r3);
+	padding: 28px 32px
+}
+
+.auth-tabs {
+	display: flex;
+	gap: 2px;
+	background: var(--bg3);
+	border: 1px solid var(--bd);
+	border-radius: var(--r);
+	padding: 3px;
+	margin-bottom: 22px
+}
+
+.atab {
+	flex: 1;
+	padding: 8px;
+	border: none;
+	border-radius: 6px;
+	font-size: 13px;
+	font-weight: 500;
+	font-family: 'DM Sans', sans-serif;
+	color: var(--t2);
+	background: none;
+	cursor: pointer;
+	transition: all .15s
+}
+
+.atab.active {
+	background: var(--bg2);
+	color: var(--t1);
+	box-shadow: 0 1px 4px rgba(0, 0, 0, .4)
+}
+
+.atab:hover:not(.active) {color: var(--t1)}
+
+.form-group {margin-bottom: 15px}
+
+.form-label {
+	display: block;
+	font-size: 11px;
+	font-weight: 600;
+	color: var(--t2);
+	text-transform: uppercase;
+	letter-spacing: .5px;
+	margin-bottom: 5px
+}
+
+.form-input {
+	width: 100%;
+	background: var(--bg3);
+	border: 1px solid var(--bd2);
+	border-radius: var(--r);
+	padding: 10px 14px;
+	color: var(--t1);
+	font-size: 14px;
+	font-family: 'DM Sans', sans-serif;
+	outline: none;
+	transition: border .15s
+}
+
+.form-input:focus {border-color: var(--blue); box-shadow: 0 0 0 3px rgba(91, 141, 239, .12)}
+.form-input::placeholder {color: var(--t3)}
+
+.btn-primary {
+	width: 100%;
+	background: var(--blue);
+	border: none;
+	color: #fff;
+	font-size: 14px;
+	font-weight: 600;
+	padding: 12px;
+	border-radius: var(--r);
+	font-family: 'DM Sans', sans-serif;
+	cursor: pointer;
+	transition: all .15s;
+	margin-top: 2px
+}
+
+.btn-primary:hover {background: var(--blue-d)}
+.btn-primary:active {transform: scale(.98)}
+
+.divider {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin: 18px 0;
+	color: var(--t3);
+	font-size: 12px
+}
+
+.divider::before, .divider::after {
+	content: '';
+	flex: 1;
+	height: 1px;
+	background: var(--bd)
+}
+
+.demo-btn {
+	width: 100%;
+	background: none;
+	border: 1px solid var(--bd2);
+	color: var(--t2);
+	font-size: 13px;
+	font-weight: 500;
+	padding: 10px;
+	border-radius: var(--r);
+	font-family: 'DM Sans', sans-serif;
+	cursor: pointer;
+	transition: all .15s
+}
+
+.demo-btn:hover {
+    background: var(--bg4);
+    color: var(--t1);
+    border-color: var(--bd3)
+}
+
+.error-msg {
+    background: rgba(232, 99, 79, .1);
+    border: 1px solid rgba(232, 99, 79, .25);
+    color: var(--red);
+    font-size: 12px;
+    padding: 10px 14px;
+    border-radius: var(--r);
+    margin-bottom: 14px;
+    display: none;
+    line-height: 1.5
+}
+
+.error-msg.show {display: block}
+
+.forgot {
+	font-size: 12px;
+	color: var(--t3);
+	cursor: pointer;
+	text-align: right;
+	margin-top: -8px;
+	margin-bottom: 14px;
+	transition: color .15s
+}
+
+.forgot:hover {color: var(--blue)}
+
+.footer-note {
+	text-align: center;
+	font-size: 12px;
+	color: var(--t3);
+	margin-top: 18px
+}

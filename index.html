@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="es">
+	<head>
+		<!-- Cofificación y Compatibilidad Móvil -->
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+		<title> ACCOVIX APP </title>
+		<!-- Fuentes de Google Fonts -->
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap"/>
+		<!-- Estilos Principales de la Página -->
+		<link rel="stylesheet" href="./AccoVix/css/main.css"/>
+		<!-- Librerías Externas -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"> </script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"> </script>
+		<!-- Guardia de Autenticación Simple -->
+		<script>
+			// Si no hay sesión redirige al login.
+			(function () {
+				const raw = sessionStorage.getItem('iq_session');
+				if (!raw) { window.location = './AccoVix/html/login.html'; return; }
+				try {
+					const s = JSON.parse(raw);
+					// Borra sesión si el ID no tiene datos asociados.
+					if (!s.isDemo && !localStorage.getItem('iq_data_' + s.id)) {
+						sessionStorage.removeItem('iq_session');
+						window.location = './AccoVix/html/login.html';
+					}
+				} catch {
+					// Si el formato de la sesión es inválido, bórrala y redirige al login.
+					sessionStorage.removeItem('iq_session');
+					window.location = './AccoVix/html/login.html';
+				}
+			})();
+		</script>
+	</head>
+	<body>
+		<!-- Contenedor Principal -->
+		<div class="app">
+			<!-- SIDEBAR -->
+			<aside class="sidebar" id="sidebar">
+			<!-- Logo + Nombre -->
+				<div class="logo">
+					<div class="logo-icon">
+						<svg width="20" height="20" viewBox="0 0 20 20" fill="none"> <path d="M10 2L18 7V13L10 18L2 13V7L10 2Z" stroke="white" stroke-width="1.5" fill="none"/> <path d="M10 6V14M6 8.5L14 11.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/> </svg>
+					</div>
+					<div>
+						<div class="logo-name"> AccoVix </div>
+						<div class="logo-tag"> Finanzas personales </div>
+					</div>
+				</div>
+				<!-- Menú de Navegación -->
+				<nav class="nav">
+					<a class="nav-item active" onclick="showView('inicio',this)" href="#"> <span class="nav-icon"> ⊞ </span> <span> Inicio </span> </a>
+					<a class="nav-item" onclick="showView('movimientos',this)" href="#"> <span class="nav-icon"> ⇄ </span> <span> Movimientos </span> </a>
+					<a class="nav-item" onclick="showView('presupuesto',this)" href="#"> <span class="nav-icon"> 🎯 </span> <span> Presupuesto </span> </a>
+					<a class="nav-item" onclick="showView('ahorro',this)" href="#"> <span class="nav-icon"> 🐷 </span> <span> Ahorro </span> </a>
+					<a class="nav-item" onclick="showView('reportes',this)" href="#"> <span class="nav-icon"> 📊 </span> <span> Reportes </span> </a>
+					<a class="nav-item" onclick="showView('alertas',this)" href="#"> <span class="nav-icon">🔔</span> <span> Alertas </span> <span class="nav-badge-dot" id="nbadge" style="display:none"> </span> </a>
+					<a class="nav-item" onclick="showView('calculadora',this)" href="#"> <span class="nav-icon"> 🧮 </span> <span> Calculadora </span> </a>
+				</nav>
+				<!-- Info de Usuario + Logout -->
+				<div class="sidebar-footer">
+					<div class="user-pill" onclick="openModal('settings')">
+						<div class="avatar" id="user-avatar"> ? </div>
+						<div class="user-info">
+							<div class="user-name" id="user-name"> … </div>
+							<div class="user-role"> Mi cuenta </div>
+						</div>
+						<span class="gear-icon"> ⚙ </span>
+					</div>
+					<button class="logout-btn" onclick="logout()"> Cerrar sesión </button>
+				</div>
+			</aside>
+			<!-- MAIN -->
+			<div class="main">
+				<!-- Barra Superior -->
+				<header class="topbar">
+					<div class="topbar-left">
+						<button class="menu-btn" onclick="toggleSidebar()"> ☰ </button>
+						<h1 class="page-title" id="page-title"> Inicio </h1>
+					</div>
+					<div class="topbar-right">
+						<div class="search-box">
+							<span class="search-icon"> 🔍 </span>
+							<input type="text" id="global-search" placeholder="Buscar movimiento…" oninput="onSearch(this.value)"/>
+						</div>
+						<button class="icon-btn" id="notif-btn" onclick="showView('alertas',null)"> 🔔 <span class="notif-dot" id="notif-dot" style="display:none"> </span> </button>
+						<button class="btn-primary" onclick="openModal('transaction')"> + Agregar </button>
+					</div>
+				</header>
+				<main class="content" id="content">
+					<!-- INICIO (Dashboard) -->
+					<div id="view-inicio" class="view active">
+						<!-- KPIs -->
+						<div class="kpi-grid">
+							<div class="kpi-card kpi-blue">
+								<div class="kpi-top"> <span class="kpi-label"> Saldo total </span> <span class="kpi-icon"> 💰 </span> </div>
+								<div class="kpi-value" id="kpi-balance"> $0 </div>
+								<div class="kpi-footer"> <span class="kpi-sub"> Acumulado </span> </div>
+								<div class="kpi-sparkline"> <canvas id="spark1"> </canvas> </div>
+							</div>
+							<div class="kpi-card kpi-green">
+								<div class="kpi-top"> <span class="kpi-label"> Ingresos del mes </span> <span class="kpi-icon"> 📈 </span> </div>
+								<div class="kpi-value" id="kpi-income"> $0 </div>
+								<div class="kpi-footer"> <span class="kpi-sub"> Este mes </span> </div>
+								<div class="kpi-sparkline"> <canvas id="spark2"> </canvas> </div>
+							</div>
+							<div class="kpi-card kpi-red">
+								<div class="kpi-top"> <span class="kpi-label"> Gastos del mes </span> <span class="kpi-icon"> 💸 </span> </div>
+								<div class="kpi-value" id="kpi-expense"> $0 </div>
+								<div class="kpi-footer"> <span class="kpi-sub"> Este mes </span> </div>
+								<div class="kpi-sparkline"> <canvas id="spark3"> </canvas> </div>
+							</div>
+							<div class="kpi-card kpi-purple">
+								<div class="kpi-top"> <span class="kpi-label"> Balance del mes</span> <span class="kpi-icon"> ✨ </span> </div>
+								<div class="kpi-value" id="kpi-saving"> $0 </div>
+								<div class="kpi-footer"> <span class="kpi-sub" id="kpi-saving-sub">Ingreso - Gastos </span> </div>
+								<div class="kpi-sparkline"> <canvas id="spark4"> </canvas> </div>
+							</div>
+						</div>
+						<!-- Charts row -->
+						<div class="charts-row">
+							<div class="card card-lg">
+								<div class="card-header">
+									<div>
+										<h3 class="card-title"> Flujo de dinero </h3>
+										<p class="card-sub"> Ingresos y gastos - últimos 6 meses </p>
+									</div>
+								</div>
+								<div class="chart-wrap" style="height:200px"> <canvas id="cashflowChart"> </canvas> </div>
+								<div class="chart-legend">
+									<span class="legend-dot" style="background:#5b8def"> </span> Ingresos
+									<span class="legend-dot" style="background:#e8634f;margin-left:12px"> </span> Gastos
+									<span class="legend-dot" style="background:#3ec98a;margin-left:12px"> </span> Balance
+								</div>
+							</div>
+							<div class="card card-sm">
+								<div class="card-header">
+									<div>
+										<h3 class="card-title"> ¿En qué gasté? </h3>
+										<p class="card-sub"> Por categoría este mes </p>
+									</div>
+								</div>
+								<div class="chart-wrap" style="height:160px;display:flex;justify-content:center"> <canvas id="donutChart" style="max-width:160px"> </canvas> </div>
+								<div class="donut-legend" id="donut-legend"> </div>
+							</div>
+						</div>
+						<!-- Bottom row -->
+						<div class="bottom-row">
+							<!-- Recent transactions -->
+							<div class="card">
+								<div class="card-header">
+									<h3 class="card-title"> Últimos movimientos </h3>
+									<button class="btn-link" onclick="showView('movimientos',null)"> Ver todos → </button>
+								</div>
+								<div id="tx-dash"> </div>
+								<div class="empty-state" id="tx-dash-empty" style="display:none">
+									<div class="empty-icon"> 📭 </div>
+									<p> Aún no tienes movimientos </p>
+									<button class="btn-sm-primary" onclick="openModal('transaction')"> + Agregar primero </button>
+								</div>
+							</div>
+							<!-- Budget mini -->
+							<div class="card">
+								<div class="card-header">
+									<div>
+										<h3 class="card-title"> Mis presupuestos </h3>
+										<p class="card-sub"> Este mes </p>
+									</div>
+									<button class="btn-link" onclick="showView('presupuesto',null)"> Ver todos → </button>
+								</div>
+								<div id="budget-dash"> </div>
+								<div class="empty-state" id="budget-dash-empty" style="display:none">
+									<div class="empty-icon"> 🎯 </div>
+									<p> Sin presupuestos aún </p>
+									<button class="btn-sm-primary" onclick="openModal('budget')"> + Crear uno </button>
+								</div>
+							</div>
+							<!-- Alerts mini -->
+							<div class="card">
+								<div class="card-header">
+									<div> <h3 class="card-title"> Alertas </h3> </div>
+									<button class="btn-link" onclick="showView('alertas',null)"> Ver todas → </button>
+								</div>
+								<div id="alerts-dash"> </div>
+							</div>
+						</div>
+					</div>
+					<!-- MOVIMIENTOS -->
+					<div id="view-movimientos" class="view">
+						<div class="view-toolbar">
+							<div class="filter-group">
+								<select class="filter-select" id="f-filter-type" onchange="renderMovimientos()">
+									<option value=""> Todo </option>
+									<option value="income"> Ingresos </option>
+									<option value="expense"> Gastos </option>
+								</select>
+								<select class="filter-select" id="f-filter-cat" onchange="renderMovimientos()"> <option value=""> Todas las categorías </option> </select>
+								<input type="month" class="filter-select" id="f-filter-month" onchange="renderMovimientos()"/>
+							</div>
+							<div style="display:flex;gap:8px">
+								<button class="btn-outline" onclick="exportPDF()"> Exportar PDF </button>
+								<button class="btn-primary" onclick="openModal('transaction')"> + Agregar movimiento </button>
+							</div>
+						</div>
+						<div class="card">
+							<table class="data-table">
+								<thead>
+									<tr>
+										<th> Fecha </th>
+										<th> Descripción </th>
+										<th> Categoría </th>
+										<th> Cuenta </th>
+										<th> Tipo </th>
+										<th> Monto </th>
+										<th> </th>
+									</tr>
+								</thead>
+								<tbody id="tx-table-body"> </tbody>
+							</table>
+							<div class="empty-state" id="tx-table-empty" style="display:none">
+								<div class="empty-icon"> 📭 </div>
+								<p> No hay movimientos con estos filtros </p>
+							</div>
+						</div>
+					</div>
+					<!-- PRESUPUESTO -->
+					<div id="view-presupuesto" class="view">
+						<!-- Summary strip -->
+						<div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px">
+							<div class="kpi-card kpi-blue">
+								<div class="kpi-top"> <span class="kpi-label"> Total presupuestado </span> <span class="kpi-icon"> 🎯 </span> </div>
+								<div class="kpi-value" id="bgt-total"> $0 </div>
+							</div>
+							<div class="kpi-card kpi-red">
+								<div class="kpi-top"> <span class="kpi-label"> Gastado </span> <span class="kpi-icon"> 💸 </span> </div>
+								<div class="kpi-value" id="bgt-spent"> $0 </div>
+							</div>
+							<div class="kpi-card kpi-green">
+								<div class="kpi-top"> <span class="kpi-label"> Disponible </span> <span class="kpi-icon"> ✅ </span> </div>
+								<div class="kpi-value" id="bgt-avail"> $0 </div>
+							</div>
+						</div>
+						<div class="card">
+							<div class="card-header">
+								<div>
+									<h3 class="card-title"> Mis categorías </h3>
+									<p class="card-sub"> Límites mensuales de gasto </p>
+								</div>
+								<button class="btn-primary" onclick="openModal('budget')"> + Nueva </button>
+							</div>
+							<div id="budget-detail"> </div>
+							<div class="empty-state" id="budget-empty" style="display:none">
+								<div class="empty-icon"> 🎯 </div>
+								<p> Crea límites de gasto por categoría </p>
+								<button class="btn-sm-primary" style="margin-top:10px" onclick="openModal('budget')"> + Crear presupuesto </button>
+							</div>
+						</div>
+						<div class="card" style="margin-top:16px">
+							<div class="card-header">
+								<h3 class="card-title"> Comparativa </h3>
+								<p class="card-sub"> Límite vs Gastado por categoría </p>
+							</div>
+							<div class="chart-wrap" style="height:240px"> <canvas id="budgetChart"> </canvas> </div>
+						</div>
+					</div>
+					<!-- AHORRO -->
+					<div id="view-ahorro" class="view">
+						<div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px">
+							<div class="kpi-card kpi-green">
+								<div class="kpi-top"> <span class="kpi-label"> Ahorro acumulado </span> <span class="kpi-icon"> 🐷 </span> </div>
+								<div class="kpi-value" id="sav-total"> $0 </div>
+							</div>
+							<div class="kpi-card kpi-blue">
+								<div class="kpi-top"> <span class="kpi-label"> Meta mensual </span> <span class="kpi-icon"> 🎯 </span> </div>
+								<div class="kpi-value" id="sav-goal"> $0 </div>
+							</div>
+							<div class="kpi-card kpi-purple">
+								<div class="kpi-top"> <span class="kpi-label"> Tasa de ahorro </span> <span class="kpi-icon"> ✨ </span> </div>
+								<div class="kpi-value" id="sav-rate">0%</div>
+								<div class="kpi-footer"> <span class="kpi-sub"> De los ingresos del mes </span> </div>
+							</div>
+						</div>
+						<!-- savings-chart-section: shown when transactions exist -->
+						<div class="card" id="savings-chart-section">
+							<div class="card-header">
+								<div>
+									<h3 class="card-title"> Ingresos, Gastos y Ahorro </h3>
+									<p class="card-sub"> Comparación mensual - últimos 6 meses </p>
+								</div>
+							</div>
+							<div class="chart-wrap" style="height:240px"> <canvas id="savingsChart"> </canvas> </div>
+							<div class="chart-legend">
+								<span class="legend-dot" style="background:#3ec98a"> </span> Ingresos
+								<span class="legend-dot" style="background:#e8634f;margin-left:12px"> </span> Gastos
+								<span class="legend-dot" style="background:#3ec98abb;margin-left:12px"> </span> Ahorro neto
+							</div>
+						</div>
+						<div class="card" style="margin-top:16px">
+							<div class="card-header">
+								<div>
+									<h3 class="card-title"> Movimientos de ahorro </h3>
+									<p class="card-sub"> Transacciones en categoría "Ahorro" </p>
+								</div>
+								<button class="btn-primary" onclick="openModal('transaction')"> + Registrar </button>
+							</div>
+							<div id="savings-txs"> </div>
+							<div class="empty-state" id="savings-empty" style="display:none">
+								<div class="empty-icon"> 🐷 </div>
+								<p> Registra movimientos con categoría "Ahorro" </p>
+							</div>
+						</div>
+					</div>
+					<!-- REPORTES -->
+					<div id="view-reportes" class="view">
+						<div class="report-tabs">
+							<button class="rtab active" onclick="switchReport('resumen',this)"> Resumen mensual </button>
+							<button class="rtab" onclick="switchReport('categorias',this)"> Por categorías </button>
+							<button class="rtab" onclick="switchReport('historial',this)"> Historial </button>
+						</div>
+						<!-- Resumen -->
+						<div id="report-resumen" class="report-section">
+							<div class="report-header">
+								<div>
+									<h2 class="report-title"> Resumen mensual </h2>
+									<p class="report-period" id="rpt-period"> </p>
+								</div>
+								<button class="btn-outline" onclick="exportPDF()"> Exportar PDF </button>
+							</div>
+							<div class="card"> <div id="report-resumen-table"> </div> </div>
+						</div>
+						<!-- Por categorías -->
+						<div id="report-categorias" class="report-section" style="display:none">
+							<div class="report-header">
+								<div>
+									<h2 class="report-title"> Gastos por categoría </h2>
+									<p class="report-period" id="rpt-period-2"> </p>
+								</div>
+							</div>
+							<div class="card"> <div class="chart-wrap" style="height:300px"> <canvas id="catBarChart"> </canvas> </div> </div>
+							<div class="card" style="margin-top:16px"> <div id="cat-table"> </div> </div>
+						</div>
+						<!-- Historial -->
+						<div id="report-historial" class="report-section" style="display:none">
+							<div class="report-header">
+								<div> <h2 class="report-title"> Historial completo </h2> </div>
+								<button class="btn-outline" onclick="exportPDF()"> Exportar PDF </button>
+							</div>
+							<div class="card">
+								<table class="data-table">
+									<thead>
+										<tr>
+											<th> Fecha </th>
+											<th> Descripción </th>
+											<th> Categoría </th>
+											<th> Tipo </th>
+											<th> Monto </th>
+										</tr>
+									</thead>
+									<tbody id="historial-body"> </tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+					<!-- ALERTAS -->
+					<div id="view-alertas" class="view">
+						<div class="card">
+							<div class="card-header">
+								<h3 class="card-title"> Centro de alertas </h3>
+								<span id="alerts-badge" class="badge danger" style="display:none"> </span>
+							</div>
+							<div id="alerts-full"> </div>
+						</div>
+					</div>
+					<!-- CALCULADORA CIENTÍFICA -->
+					<div id="view-calculadora" class="view">
+						<div class="calc-layout">
+							<!-- Panel principal: display + botones -->
+							<div class="card calc-card">
+								<!-- Display: expresión actual + resultado -->
+								<div class="calc-display-wrap">
+									<div class="calc-expr" id="calc-expr"> </div>
+									<div class="calc-result" id="calc-result"> 0 </div>
+								</div>
+								<!-- Grid de botones -->
+								<div class="calc-grid">
+									<!-- Fila científica -->
+									<button class="calc-btn calc-sci" onclick="Calc.press('sin(')"> sin </button>
+									<button class="calc-btn calc-sci" onclick="Calc.press('cos(')"> cos </button>
+									<button class="calc-btn calc-sci" onclick="Calc.press('tan(')"> tan </button>
+									<button class="calc-btn calc-sci" onclick="Calc.press('log(')"> log </button>
+									<button class="calc-btn calc-sci" onclick="Calc.press('ln(')"> ln </button>
+									<!-- Fila científica 2 -->
+									<button class="calc-btn calc-sci" onclick="Calc.press('sqrt(')"> √ </button>
+									<button class="calc-btn calc-sci" onclick="Calc.press('^')"> x^y </button>
+									<button class="calc-btn calc-sci" onclick="Calc.press('π')"> π </button>
+									<button class="calc-btn calc-sci" onclick="Calc.press('e')"> e </button>
+									<button class="calc-btn calc-sci" onclick="Calc.press('(')"> ( ) </button>
+									<!-- Fila operadores superiores -->
+									<button class="calc-btn calc-fn" onclick="Calc.clear()"> C </button>
+									<button class="calc-btn calc-fn" onclick="Calc.backspace()"> ⌫ </button>
+									<button class="calc-btn calc-fn" onclick="Calc.press('%')"> % </button>
+									<button class="calc-btn calc-op" onclick="Calc.press('÷')"> ÷ </button>
+									<!-- placeholder vacío -->
+									<span> </span>
+									<!-- Fila 4–6: dígitos + operadores -->
+									<button class="calc-btn" onclick="Calc.press('7')"> 7 </button>
+									<button class="calc-btn" onclick="Calc.press('8')"> 8 </button>
+									<button class="calc-btn" onclick="Calc.press('9')"> 9 </button>
+									<button class="calc-btn calc-op" onclick="Calc.press('x')"> x </button>
+									<span> </span>
+									<button class="calc-btn" onclick="Calc.press('4')"> 4 </button>
+									<button class="calc-btn" onclick="Calc.press('5')"> 5 </button>
+									<button class="calc-btn" onclick="Calc.press('6')"> 6 </button>
+									<button class="calc-btn calc-op" onclick="Calc.press('-')"> - </button>
+									<span> </span>
+									<button class="calc-btn" onclick="Calc.press('1')"> 1 </button>
+									<button class="calc-btn" onclick="Calc.press('2')"> 2 </button>
+									<button class="calc-btn" onclick="Calc.press('3')"> 3 </button>
+									<button class="calc-btn calc-op" onclick="Calc.press('+')"> + </button>
+									<span> </span>
+									<!-- Fila inferior -->
+									<button class="calc-btn calc-zero" onclick="Calc.press('0')"> 0 </button>
+									<button class="calc-btn" onclick="Calc.press('.')"> . </button>
+									<button class="calc-btn" onclick="Calc.press(')')"> ) </button>
+									<button class="calc-btn calc-eq" onclick="Calc.compute()"> = </button>
+									<span> </span>
+								</div>
+								<!-- Botón de integración con movimientos -->
+								<button class="calc-use-btn" onclick="Calc.useResult()"> Usar resultado en nuevo movimiento </button>
+							</div>
+							<!-- Panel lateral: historial -->
+							<div class="card calc-history-card">
+								<div class="card-header">
+									<div>
+										<h3 class="card-title"> Historial </h3>
+										<p class="card-sub"> Últimas operaciones </p>
+									</div>
+									<button class="btn-link" onclick="Calc.clearHistory()"> Limpiar </button>
+								</div>
+								<div id="calc-history" class="calc-history-list"> <p class="calc-history-empty"> Sin operaciones aún </p> </div>
+								<div class="calc-kb-hints">
+									<p class="card-sub" style="margin-bottom:6px"> Teclado </p>
+									<div class="calc-kb-grid">
+										<kbd> 0-9 </kbd> <span> Números </span>
+										<kbd> + - * / </kbd> <span> Operadores </span>
+										<kbd> Enter </kbd> <span> Calcular </span>
+										<kbd> Backspace </kbd> <span> Borrar </span>
+										<kbd> Esc </kbd> <span> Limpiar </span>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</main>
+			</div>
+		</div>
+		<!-- MODAL -->
+		<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+			<div class="modal" id="modal">
+				<div class="modal-header">
+					<h3 class="modal-title" id="modal-title"> </h3>
+					<button class="modal-close" onclick="closeModal()"> ✕ </button>
+				</div>
+				<div class="modal-body" id="modal-body"> </div>
+			</div>
+		</div>
+		<!-- TOAST -->
+		<div class="toast" id="toast"> </div>
+		<!-- Scripts de la Página -->
+		<script src="./AccoVix/js/storage.js"> </script> <!-- Manejo de localStorage / session -->
+		<script src="./AccoVix/js/charts.js"> </script> <!-- Configuración de los Gráficos -->
+		<script src="./AccoVix/js/ui.js"> </script> <!-- Funciones de Interacción y Renderizado -->
+		<script src="./AccoVix/js/app.js"> </script> <!-- Lógica de la Aplicación -->
+	</body>
+</html>

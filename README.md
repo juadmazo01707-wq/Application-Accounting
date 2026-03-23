@@ -195,5 +195,3 @@ Application-Accouting/
         ├── charts.js
         └── login.js
 ```
-
----
