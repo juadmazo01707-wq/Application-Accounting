@@ -5,12 +5,12 @@ let SESSION = null;
 
 function logout() {
 	sessionStorage.removeItem('iq_session');
-	window.location = '../html/login.html';
+	window.location = '../AccoVix/html/login.html';
 }
-h
+
 function bootstrap() {
 	SESSION = Storage.getSession();
-	if (!SESSION) { window.location = '../html/login.html'; return; }
+	if (!SESSION) { window.location = '../AccoVix/html/login.html'; return; }
 
 	// Fill user info
 	document.getElementById('user-name').textContent = SESSION.name;
@@ -601,7 +601,7 @@ function exportPDF() {
 //  TOAST
 let _toastT;
 function showToast(msg, type = 'info') {
-	const icons = { success: '✓', error: '✕', info: '¡', warn: '⚠' };
+	const icons = { success: '✓', error: '✕', info: 'i', warn: '⚠' };
 	const el = document.getElementById('toast');
 	el.innerHTML = `<span>${icons[type] || ''}</span> ${msg}`;
 	el.className = `toast ${type} show`;

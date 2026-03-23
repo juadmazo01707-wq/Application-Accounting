@@ -96,14 +96,6 @@ const Charts = (() => {
 	//  Savings line 
 	function savings(id) {
 		const monthly = Storage.Transactions.monthly(6);
-		// Datos de ahorro acumulado mes a mes
-		let cumulative = 0;
-		const savData = monthly.map(m => {
-			// Ahorro real = transacciones en categoría "Ahorro" ese mes
-			const txs = Storage.Transactions.all();
-			const key = m.label; // usamos el label para identificar — calculamos de otra forma abajo
-			return m.saving;
-		});
 		// Gráfica comparativa: Ingresos, Gastos y Ahorro neto por mes
 		_create(id, {
 			type: 'bar',
