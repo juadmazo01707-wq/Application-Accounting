@@ -5,7 +5,7 @@ let SESSION = null;
 
 function logout() {
 	sessionStorage.removeItem('iq_session');
-	window.location = '../AccoVix/html/login.html';
+	window.location = './AccoVix/html/login.html';
 }
 
 function bootstrap() {
