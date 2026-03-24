@@ -10,7 +10,7 @@ function logout() {
 
 function bootstrap() {
 	SESSION = Storage.getSession();
-	if (!SESSION) { window.location = '../AccoVix/html/login.html'; return; }
+	if (!SESSION) { window.location = './AccoVix/html/login.html'; return; }
 
 	// Fill user info
 	document.getElementById('user-name').textContent = SESSION.name;
